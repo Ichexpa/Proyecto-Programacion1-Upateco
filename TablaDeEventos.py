@@ -58,6 +58,9 @@ class TablaDeEventos(tk.Frame):
         self.tabla.heading("Duracion", text="Duracion", anchor="center")
         self.tabla.heading("Descripcion", text="Descripcion", anchor="center")
         self.tabla.heading("Importante", text="Importante", anchor="center")
+        #Color para filas importantes
+        self.tabla.tag_configure("importante", background="#33B289",foreground="white")
+        self.tabla.tag_configure("sinImportancia", background="white",foreground="black")
         self.tabla.grid(row=2,column=0,columnspan=4);
         self.cargarTablaPorSemana();
         #ttk.Button(self,text="Mostrar Detalle del Evento Seleccionado",command=self.abrirVentanaDetalle).grid()
@@ -69,8 +72,8 @@ class TablaDeEventos(tk.Frame):
         VentanaDetalleEvento(self.padre,valor);
     def agregarEventoATabla(self,evento):
         #Se guarda el evento formateado al json que a su vez lo guarda en la lista de la clase
-        resultadoGuardado=self.accesorAlFicheroJson.agregarObjetoAFichero(evento.getEventoComoDict());
-        if(resultadoGuardado):
+        noSeEncuentraRepetido=self.accesorAlFicheroJson.agregarObjetoAFichero(evento.getEventoComoDict());
+        if (noSeEncuentraRepetido):
             fechaTipoDate = AdministradorDeFechas.cadenaDeFechaADate(evento.fecha)
             seEncuentraEnLaSemana = AdministradorDeFechas.seEncuentraEnLaSemana(fechaTipoDate,  # Retorna un booleano
                                                                             self.contadorSiguienteSemana)
@@ -95,9 +98,9 @@ class TablaDeEventos(tk.Frame):
                             evento.duracion,
                             evento.descripcion,
                             self.esImportante(evento.importancia))
-        self.tabla.insert("", tk.END, values=tuplaNuevoEvento);
-
+        self.tabla.insert("", tk.END, values=tuplaNuevoEvento,tags=self.colorFilaImportante(evento.importancia));
         self.agregarFechaOrdenada();
+    
     def cargarTablaPorSemana(self):
         self.eliminarFilas();
         listaDeEventosPrimeraSemana = self.accesorAlFicheroJson.obtenerPrimerosSieteDias(self.contadorSiguienteSemana);
@@ -112,7 +115,8 @@ class TablaDeEventos(tk.Frame):
                                                       evento["hora"],
                                                       evento["duracion"],
                                                       evento["descripcion"],
-                                                      self.esImportante(evento["importancia"])));
+                                                      self.esImportante(evento["importancia"])),
+                                                      tags=self.colorFilaImportante(evento["importancia"]));
         # Esto solo se aplicara cuando se clickee siguiente
     def esImportante(self,valor):
         if (valor):
@@ -120,6 +124,11 @@ class TablaDeEventos(tk.Frame):
         else:
             esImportante="No"
         return esImportante;
+    def colorFilaImportante(self,valor):
+        if (valor):
+            return "importante"
+        else:
+            return "sinImportancia"
     def eliminarFilas(self):
         for fila in self.tabla.get_children():
             self.tabla.delete(fila);
@@ -153,7 +162,9 @@ class TablaDeEventos(tk.Frame):
                                      evento.hora,
                                      evento.duracion,
                                      evento.descripcion,
-                                     self.esImportante(evento.importancia)))
+                                     self.esImportante(evento.importancia)),
+                                    tags=self.colorFilaImportante(evento.importancia))
+       self.agregarFechaOrdenada()
     def filtrarPorMes(self):
         self.cargarRegistrosDelMesEnTabla();
         self.botonMesSiguiente.grid(row=1, column=3)
