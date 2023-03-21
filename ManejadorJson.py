@@ -9,18 +9,23 @@ class ManejadorJson:
     def comprobarRepitencia(self,evento):
         #if(evento[""])
         pass
-
     def agregarObjetoAFichero(self, evento):
-        self.contenedorObjetos.append(evento);          
-        self.escribirEnFichero()
+        tuplaFechaYHora=(" ",evento["fecha"],evento["hora"]);
+        if (self.encontrarObjeto(tuplaFechaYHora) == False):
+            self.contenedorObjetos.append(evento);          
+            self.escribirEnFichero();
+            return True
+        else:
+            return False
 
     def encontrarObjeto(self, evento):
-        eventoAEliminar=AdministradorDeFechas.unirFechaYHoraCadenasEnDatetime(evento[1],evento[2]);
+        eventoAEncontrar=AdministradorDeFechas.unirFechaYHoraCadenasEnDatetime(evento[1],evento[2]);
         for indice,objeto in enumerate(self.contenedorObjetos):
-            fechaDelEventoAElminar=AdministradorDeFechas.unirFechaYHoraCadenasEnDatetime(objeto["fecha"],objeto["hora"]);
-            if(eventoAEliminar==fechaDelEventoAElminar):
+            fechaDelEventoAEncontrar = AdministradorDeFechas.unirFechaYHoraCadenasEnDatetime(objeto["fecha"],
+                                                                                             objeto["hora"])
+            if (eventoAEncontrar == fechaDelEventoAEncontrar):
                 return indice,objeto;
-        print("No se econtro coincidencia");
+        return False #Si no se encuentra el indice
     
     def eliminarObjeto(self,evento):
         indice=self.encontrarObjeto(evento)[0];
@@ -59,8 +64,6 @@ class ManejadorJson:
             if (AdministradorDeFechas.comprobarSiSeEncuentraEnElMesActual(fechaAComparar,mesInferior,mesSuperior)):
                 listaDeEventosMeses.append(self.contenedorObjetos[indice]);
         return listaDeEventosMeses
-    
-        
 
         
 

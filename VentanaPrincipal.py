@@ -10,7 +10,7 @@ class VentanaPrincipal(tk.Frame):
         super().__init__(padre);
         self.padre=padre;
         self.manejadorJson=ManejadorJson("eventos.json");
-        self.tablaDeEventos=TablaDeEventos(self);
+        self.tablaDeEventos=TablaDeEventos(self,self.manejadorJson);
         self.tablaDeEventos.grid(row=0,column=1);
         self.componenteEvento = ComponenteEvento(self, self.tablaDeEventos,self.manejadorJson)
         self.componenteEvento.grid(row=0, column=0)
