@@ -27,6 +27,19 @@ class ManejadorJson:
                 return indice,objeto;
         return False #Si no se encuentra el indice
     
+    def limpiarCadenas(palabra):
+
+        a, b = 'áéíóú', 'aeiou'
+        trans = str.maketrans(a, b);
+        return  palabra.translate(trans).strip().upper();
+      
+    def encontrarEventoPorPalabraClaveOTitulo(self,NombreeventoOPalabraClave):
+        cadenaLimpia = ManejadorJson.limpiarCadenas(NombreeventoOPalabraClave);
+        eventosCoincidentes=[];
+        for evento in self.contenedorObjetos:
+            if (cadenaLimpia == ManejadorJson.limpiarCadenas(evento["titulo"]) or cadenaLimpia == ManejadorJson.limpiarCadenas(evento["identificadorEvento"])):
+                eventosCoincidentes.append(evento);
+        return eventosCoincidentes;
     def eliminarObjeto(self,evento):
         indice=self.encontrarObjeto(evento)[0];
         print("Indice del objeto a eliminar"+ str(indice));
@@ -37,10 +50,6 @@ class ManejadorJson:
         with open(self.ruta, "w", encoding="UTF-8") as archivo:
             json.dump(self.contenedorObjetos, archivo)
 
-    def modificarObjeto(self,evento):
-        indice=self.encontrarObjeto(evento);
-        
-        pass
     def cargarContenedorEvento(self):
         try:
             with open(self.ruta, "r", encoding="UTF-8") as archivo:
@@ -51,14 +60,15 @@ class ManejadorJson:
             archivo.close();
     def obtenerPrimerosSieteDias(self,dias=7):
         listaPrimerosDias=[]
+        adminFechas = AdministradorDeFechas();
         for indice,item in enumerate(self.contenedorObjetos):
             fechaAComparar = AdministradorDeFechas.cadenaDeFechaADate(item["fecha"]);
-            if (AdministradorDeFechas.seEncuentraEnLaSemana(fechaAComparar,dias)):
+            if (adminFechas.seEncuentraEnLaSemana(fechaAComparar, dias)):
                 listaPrimerosDias.append(self.contenedorObjetos[indice]);
         return listaPrimerosDias;
 
     def obtenerMes(self,mesInferior,mesSuperior):
-        listaDeEventosMeses=[];        
+        listaDeEventosMeses=[];
         for indice, item in enumerate(self.contenedorObjetos):
             fechaAComparar = AdministradorDeFechas.cadenaDeFechaADate(item["fecha"]);
             if (AdministradorDeFechas.comprobarSiSeEncuentraEnElMesActual(fechaAComparar,mesInferior,mesSuperior)):

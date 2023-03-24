@@ -67,6 +67,11 @@ class ComponenteEvento(tk.Frame):
                   padx=5, pady=5,font=self.fuenteDelComponente,bg=self.colorBotones);
         self.botonCrearEvento.grid(
             row=8, column=0, columnspan=4, sticky="snew");
+        self.botonEditarEvento = tk.Button(
+        self.contenedorForm, text="Editar", font=self.fuenteDelComponente, bg=self.colorBotones,
+        command=self.modificarEvento);
+        self.botonCancelarEdicion = tk.Button(self.contenedorForm, text="Cancelar Edicion",
+                                              command=self.reestabecerBotonOriginal, font=self.fuenteDelComponente, bg="#CF6562")
     def setEvento(self):
         if(not self.comprobarEntrysVacios()):
             self.cargarEvento();            
@@ -78,16 +83,12 @@ class ComponenteEvento(tk.Frame):
     def getEvento(self):
         return self.evento;
 
-    def editarRegistro(self,evento,indice,indiceFilaTabla):
-        print(evento);
-        self.indiceElementoAEditar=indice;
-        self.indiceFilaTabla=indiceFilaTabla;
-        fechaFormateadaADate = AdministradorDeFechas.cadenaDeFechaADate(evento["fecha"]);
-        fechaRecordatorioFormateada = AdministradorDeFechas.cadenaDeFechaADate(evento["fechaRecordatorio"])
-        #print(f"La fecha en editar evento {fechaFormateadaADate}")
-        #fechaRecordatorioFormateada;
-        self.contenedorForm.configure(text="Modificar Evento")
-        self.botonCrearEvento.grid_forget()
+    def colocarRegistrosCargadosEnCampos(self,evento):
+        fechaFormateadaADate = AdministradorDeFechas.cadenaDeFechaADate(
+            evento["fecha"])
+        fechaRecordatorioFormateada = AdministradorDeFechas.cadenaDeFechaADate(
+            evento["fechaRecordatorio"])
+
         self.tituloInput.delete(0, tk.END)
         self.tituloInput.insert(0, evento["titulo"])
         #self.fechaInput.delete(0, tk.END)
@@ -96,26 +97,38 @@ class ComponenteEvento(tk.Frame):
         self.horaInput.insert(0, evento["hora"])
         self.duracionInput.delete(0, tk.END)
         self.duracionInput.insert(0, evento["duracion"])
-        if (evento["importancia"]):  # Tengo que recuperar la informacion de la tabla dependiendo el resultado lo comparo y seteo checked o no
+
+        if (evento["importancia"]):
             self.checkButtonInput.select()
         else:
             self.checkButtonInput.deselect()
-        #self.fechaRecordatorioInput.delete(0, tk.END)
+        
         self.fechaRecordatorioInput.set_date(fechaRecordatorioFormateada)
         self.horaRecordatorioInput.delete(0, tk.END)
-        self.horaRecordatorioInput.insert(
-            0,evento["horaRecordatorio"])
+        self.horaRecordatorioInput.insert(0, evento["horaRecordatorio"])
         self.identificadoInput.delete(0, tk.END)
-        self.identificadoInput.insert(0, evento["identificadorEvento"]);
+        self.identificadoInput.insert(0, evento["identificadorEvento"])
         self.descripcion.delete("1.0", 'end-1c')
-        self.descripcion.insert(tk.INSERT, evento["descripcion"]);
-        print(self.titulo.get())
-        self.botonEditarEvento = tk.Button(
-            self.contenedorForm, text="Editar", font=self.fuenteDelComponente, bg=self.colorBotones,
-            command=self.modificarEvento);
+        self.descripcion.insert(tk.INSERT, evento["descripcion"])
+
+    def editarRegistro(self,evento,indice,indiceFilaTabla):
+        print(evento);
+        #Declaro los botones
+        self.contenedorForm.configure(text="Modificar Evento")
+        self.botonCrearEvento.grid_forget()
+      
+        #Para que los botones no se agregue el mismo componente en la misma posicion
+        self.botonCancelarEdicion.grid_forget();
+        self.botonEditarEvento.grid_forget();
+        
+        #Se guardan los indices para luego pasarlos a la clase de la tabla
+        self.indiceElementoAEditar=indice;
+        self.indiceFilaTabla=indiceFilaTabla;       
+
+        self.colocarRegistrosCargadosEnCampos(evento);
+
         self.botonEditarEvento.grid(row=8, column=0, columnspan=2,sticky="we",padx=5);
-        self.botonCancelarEdicion = tk.Button(self.contenedorForm, text="Cancelar Edicion",
-                                              command=self.reestabecerBotonOriginal, font=self.fuenteDelComponente, bg="#CF6562");
+        
         self.botonCancelarEdicion.grid(row=8, column=2, columnspan=2,sticky="we",padx=5);
 
     def reestabecerBotonOriginal(self):
