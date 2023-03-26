@@ -1,15 +1,11 @@
-from datetime import date, datetime,timedelta;
-
+from datetime import date, datetime,timedelta,time;
 from calendar import monthrange
 
 class AdministradorDeFechas:
 
     def __init__(self):
-        #Debo modulizar este codigo
         self.actualizarAtributosFecha(7);
-        #hasta aca
-        #self.fechaLimiteInferior=0;
-        #self.fechaLimiteSuperior=0;
+
 
     def cadenaDeFechaADate(fecha):
        return datetime.strptime(fecha,'%d-%m-%Y').date();
@@ -32,7 +28,7 @@ class AdministradorDeFechas:
         return f'{dias[fecha.weekday()]} {fecha.day} de {meses[fecha.month-1]} del {fecha.year}';
 
     def unirFechaYHoraCadenasEnDatetime(fecha,hora):
-        
+
         fechaYhora=f'{fecha} {hora}';
         fechaYhoraConvertidos=datetime.strptime(fechaYhora,"%d-%m-%Y %H:%M");
         return fechaYhoraConvertidos;
@@ -54,3 +50,40 @@ class AdministradorDeFechas:
         meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         return f'{meses[self.fechaPrimerDia.month-1]} del {self.fechaPrimerDia.year}'
+
+    def validarHora(hora, minutos):
+        try:
+            hora=int(hora);
+            minutos=int(minutos);
+            print(type(hora))
+            print(type(minutos))
+            print("test Hora Entro Bien")
+            if (hora >= 0 and hora <= 23 and minutos >= 0 and minutos < 60):
+                return True
+        except ValueError:
+            print(f'{hora}:{minutos}');
+            print("Agarro campos como invalidos")
+            if (hora == "" or minutos == ""):
+                return True;
+        return False;
+
+    def getFechaFormateada(hora,minutos):
+        if (hora == "" or minutos == ""):
+            horaActual = datetime.now().time();  
+        else:
+            horaActual = time(int(hora), int(minutos));
+    
+        return AdministradorDeFechas.agregarCeroAHoraMinuto(horaActual);
+        
+    def agregarCeroAHoraMinuto(hora):
+        parteHora=str(hora.hour);
+        parteMinuto=str(hora.minute);
+        if(int(parteHora)<10):
+            parteHora="0"+parteHora;
+        if(int(parteMinuto)<10):
+            parteMinuto="0"+parteMinuto;
+        return f'{parteHora}:{parteMinuto}';
+    def horaYMinutoSeparados(horaString):
+        return horaString[:2], horaString[3:]
+
+print(AdministradorDeFechas.horaYMinutoSeparados("02:20"))

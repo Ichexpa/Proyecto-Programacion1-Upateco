@@ -1,5 +1,4 @@
 import json;
-from datetime import date, datetime,timedelta;
 from AdministradorDeFechas import AdministradorDeFechas
 class ManejadorJson:
     def __init__(self,ruta):

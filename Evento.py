@@ -1,4 +1,3 @@
-from datetime import date, datetime
 class Evento:
     def __init__(self, titulo, fecha, hora, duracion, fechaRecordatorio, horaRecordatorio, identificadorEvento, descripcion="", importancia=False):
         self.titulo=titulo;
