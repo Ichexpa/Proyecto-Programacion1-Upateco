@@ -3,6 +3,7 @@ from tkinter import ttk,messagebox;
 from VentanaDetalleEvento import VentanaDetalleEvento
 from AdministradorDeFechas import AdministradorDeFechas
 from datetime import datetime
+
 class TablaDeEventos(tk.Frame):
     colorDeFondo = "#BFDFB2"
     fuenteTextos = "consolas 14 bold"
@@ -20,12 +21,12 @@ class TablaDeEventos(tk.Frame):
         self.accesorAlFicheroJson = manejadorJson;
         self.ingresobuscarEvento=tk.StringVar()
         self.estilo = ttk.Style()
-        self.estilo.configure("mystyle.Treeview", highlightthickness=0, bd=0,
-                        font=('consolas', 11))  # Modifico la fuente de las filas
-        self.estilo.configure("mystyle.Treeview.Heading", font=(
-            'consolas', 12, 'bold'))  # Modifico la fuente del header de la tabla
-        self.estilo.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {
-                    'sticky': 'nswe'})])  # remuevo los bordes
+        # Modifico la fuente de las filas
+        self.estilo.configure("mystyle.Treeview", highlightthickness=0, bd=0,font=('consolas', 11))  
+        # Modifico la fuente del header de la tabla
+        self.estilo.configure("mystyle.Treeview.Heading", font=('consolas', 12, 'bold')) 
+        # remuevo los bordes
+        self.estilo.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})]) 
         
         self.contenedorTabla = tk.LabelFrame(self, text="Eventos", font=self.fuenteTextos, padx=30, pady=30)
         self.contenedorTabla.grid(row=0, column=0, padx=10, pady=10)
@@ -36,8 +37,8 @@ class TablaDeEventos(tk.Frame):
                                         font=self.fuenteBotones,justify="center");
         self.buscarEventoInput.grid(row=1,column=0,sticky="snwe")
         self.botonBuscarEvento=tk.Button(self.contenedorTabla,text="Buscar evento",
-                                         bg="#0D4AA7", fg="white", font=self.fuenteBotones)
-        self.botonBuscarEvento.bind("<Button-1>",self.buscarEvento);
+                                         bg="#0D4AA7", fg="white", font=self.fuenteBotones,command=self.buscarEvento);
+        #self.botonBuscarEvento.bind("<Button-1>",self.buscarEvento);
         self.botonBuscarEvento.grid(row=1,column=1)
 
         self.botonAnteriorSemana = tk.Button(self.contenedorTabla, text="Anterior Semana",
@@ -61,15 +62,17 @@ class TablaDeEventos(tk.Frame):
         self.botonMesAnterior.bind("<Button-1>", self.mesAnterior)
 
         self.comboOpcionesDeFiltro=ttk.Combobox(self.contenedorTabla,values=["Filtrar por Mes","Filtrar por Semana"],
-                                                font=self.fuenteBotones)
-        self.comboOpcionesDeFiltro.current(1)#Por defecto estara apuntando a filtrar por semana
+                                                font=self.fuenteBotones);
+        #Por defecto estara apuntando a filtrar por semana
+        self.comboOpcionesDeFiltro.current(1)
         self.comboOpcionesDeFiltro.bind("<<ComboboxSelected>>",self.seleccionDeFiltro);
         self.comboOpcionesDeFiltro.grid(row=0,column=2,columnspan=2,sticky="we",pady=15);
         
         self.tabla = ttk.Treeview(self.contenedorTabla,
                                   columns=("Titulo", "Fecha", "Hora",
                                            "Duracion", "Descripcion", "Importante"), style="mystyle.Treeview")
-        #tabla.column para setear el tamaño de las columnas y alineacion creo
+        
+        #Defino las columnas
         self.tabla.column("#0", width=0)
         self.tabla.column("Titulo", width=200, anchor="center")
         self.tabla.column("Fecha", width=100, anchor="center")
@@ -101,14 +104,15 @@ class TablaDeEventos(tk.Frame):
 
         self.labelMesActual = tk.Label(self.contenedorTabla, text=self.administradorDeFecha.getNombreMesActual(),
                                         font=self.fuenteSemanasMeses)
-        #ttk.Button(self,text="Mostrar Detalle del Evento Seleccionado",command=self.abrirVentanaDetalle).grid()
+        
         self.tabla.bind("<Double-1>", self.mostrarDetalleEventoSeleccionado)
-
+    
     def mostrarDetalleEventoSeleccionado(self, e):        
         seleccionado=self.tabla.focus();
         valor = self.tabla.item(seleccionado,"value") ;
         eventoCompleto=self.accesorAlFicheroJson.encontrarObjeto(valor)[1];
         VentanaDetalleEvento(self.padre, eventoCompleto)
+
     def agregarEventoATabla(self,evento):
         #Se guarda el evento formateado al json que a su vez lo guarda en la lista de la clase
         noSeEncuentraRepetido=self.accesorAlFicheroJson.agregarObjetoAFichero(evento.getEventoComoDict());
@@ -119,17 +123,19 @@ class TablaDeEventos(tk.Frame):
             seEncuentraEnElMes = AdministradorDeFechas.comprobarSiSeEncuentraEnElMesActual(fechaTipoDate,
                                                                                        self.administradorDeFecha.fechaPrimerDia,
                                                                                        self.administradorDeFecha.fechaUltimoDia)
+            #Si esta en mes y se encuentra en los intervalos del mes se agrega a la tabla
             if (self.comboOpcionesDeFiltro.get() == "Filtrar por Mes" and seEncuentraEnElMes):
-                self.agregarEventoOrdenado(evento)
+                self.agregarEventoOrdenado(evento);
+            #Si esta en la semana y se encuentra entre los intervalos de la semana se agrega a la tabla
             elif (self.comboOpcionesDeFiltro.get() == "Filtrar por Semana" and seEncuentraEnLaSemana):
-                self.agregarEventoOrdenado(evento)
+                self.agregarEventoOrdenado(evento);
+
+            messagebox.showinfo("Evento agregado", "Evento agregado con exito");
         else:
             messagebox.showerror("Evento existente","Ya existe un evento con la fecha y hora indicada");
-            
-        #Se pasa a fecha la fecha que se encontraba en string para poder comprobar si se encuentra en la semana
+           
         
-    #Si esta en mes y se encuentra en el parametro se agrega a la tabla
-    #Se esta en la semana y se enceuntra entre los intervalos se agrega a la tabla
+    
     def agregarEventoOrdenado(self,evento):
         tuplaNuevoEvento = (evento.titulo,
                             evento.fecha,
@@ -139,7 +145,7 @@ class TablaDeEventos(tk.Frame):
                             self.esImportante(evento.importancia))
         self.tabla.insert("", tk.END, values=tuplaNuevoEvento,tags=self.colorFilaImportante(evento.importancia));
         self.agregarFechaOrdenada();
-        messagebox.showinfo("Evento agregado","Evento agregado con exito");
+        
     
     def cargarTablaOrdenada(self,lista):
         lista = sorted(lista,key=lambda elemento:
@@ -212,6 +218,7 @@ class TablaDeEventos(tk.Frame):
                                     tags=self.colorFilaImportante(evento.importancia))
        self.agregarFechaOrdenada();
        messagebox.showinfo("Evento modificado","Evento modificado con éxito");
+    
     def filtrarPorMes(self):
         self.cargarRegistrosDelMesEnTabla();
         self.botonMesSiguiente.grid(row=1, column=3)
@@ -222,7 +229,7 @@ class TablaDeEventos(tk.Frame):
         self.administradorDeFecha.getMesActual(self.administradorDeFecha.fechaUltimoDia);
         self.labelMesActual.config(text=self.administradorDeFecha.getNombreMesActual());
         self.cargarRegistrosDelMesEnTabla();        
-        #print(f"Mostrando Fecha desde siguiente mes {self.administradorDeFecha.fechaUltimoDia} {self.administradorDeFecha.fechaPrimerDia}")
+        
     def mesAnterior(self,e):
         self.administradorDeFecha.restarMes();
         self.administradorDeFecha.getMesActual(self.administradorDeFecha.fechaPrimerDia);
@@ -234,28 +241,26 @@ class TablaDeEventos(tk.Frame):
         self.botonSiguienteSemana.grid_forget();
         self.botonMesSiguiente.grid_forget();
         self.botonMesAnterior.grid_forget();
-        self.labelFechaInferior.grid_forget()
-        self.labelFechaSuperior.grid_forget()
-        self.labelMesActual.grid_forget()
+        self.labelFechaInferior.grid_forget();
+        self.labelFechaSuperior.grid_forget();
+        self.labelMesActual.grid_forget();
         if(self.comboOpcionesDeFiltro.get()=="Filtrar por Semana"):            
             self.cargarTablaPorSemana();
             self.botonSiguienteSemana.grid(row=1,column=3);
             self.botonAnteriorSemana.grid(row=1,column=2);
             self.labelFechaInferior.grid(row=2,column=0,columnspan=2);
-            self.labelFechaSuperior.grid(row=2, column=2, columnspan=2)
+            self.labelFechaSuperior.grid(row=2, column=2, columnspan=2);
         else:
             self.labelMesActual.config(text = self.administradorDeFecha.getNombreMesActual())
             self.labelMesActual.grid(row=2, column=1, columnspan=2);
-            #Label self.administradorDeFecha.getNombreMesActual();
             self.filtrarPorMes();
 
-    def buscarEvento(self,e):
+    def buscarEvento(self):
         valorDelInput = self.ingresobuscarEvento.get();
-        listaDeCoincidencias = self.accesorAlFicheroJson.encontrarEventoPorPalabraClaveOTitulo(
-            valorDelInput)
+        listaDeCoincidencias = self.accesorAlFicheroJson.encontrarEventoPorPalabraClaveOTitulo(valorDelInput);
         if(len(listaDeCoincidencias)>0):
             self.eliminarFilas();
             self.cargarTablaOrdenada(listaDeCoincidencias);
         else:
             messagebox.showinfo("Sin coincidencias",
-                                "No se encontraron eventos que coincidan con " + valorDelInput)
+                                "No se encontraron eventos que coincidan con " + valorDelInput);

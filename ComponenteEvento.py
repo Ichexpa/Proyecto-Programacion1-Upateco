@@ -1,15 +1,16 @@
 import tkinter as tk
-from tkinter import ttk
 from Evento import Evento;
-from datetime import date
 from tkcalendar import DateEntry
 from AdministradorDeFechas import AdministradorDeFechas
 from tkinter import messagebox
 import locale
+from datetime import datetime
 class ComponenteEvento(tk.Frame):
+
     colorDeFondo = "#BFDFB2"
     fuenteDelComponente = "consolas 13 bold"
     colorBotones = "#62CFA4";
+
     def __init__(self, padre,tabla,manejadorDeLaListaEventos):
         super().__init__(padre)
         self.tablaEventos=tabla;
@@ -19,7 +20,7 @@ class ComponenteEvento(tk.Frame):
         self.titulo=tk.StringVar();
         self.hora =tk.StringVar();
         self.minutos =tk.StringVar();
-        self.duracion=tk.IntVar(value=1);
+        self.duracion=tk.StringVar(value="1 Hora");
         self.importancia=tk.BooleanVar();
         self.horaRecordatorio = tk.StringVar()
         self.minutosRecordatorio = tk.StringVar()
@@ -64,8 +65,7 @@ class ComponenteEvento(tk.Frame):
             row=3, column=0,columnspan=2, ipadx=5);
         tk.Label(self.contenedorForm, text="Hora de Recordatorio", font=self.fuenteDelComponente).grid(
             row=3, column=2, columnspan=2,ipadx=5);
-        self.fechaRecordatorioInput = DateEntry(
-            self.contenedorForm, locale="es_ES", font=self.fuenteDelComponente)
+        self.fechaRecordatorioInput = DateEntry(self.contenedorForm, locale="es_ES", font=self.fuenteDelComponente)
         self.fechaRecordatorioInput.grid(row=4, column=0, columnspan=2);
 
         self.contenedorHoraFechaRecordatorio = tk.Frame(self.contenedorForm)
@@ -81,15 +81,13 @@ class ComponenteEvento(tk.Frame):
         self.minutosRecordatorio.set("");
         self.minutosRecordatorioInput.grid(row=0, column=1)
 
-        tk.Label(self.contenedorForm, text="Identificar Evento como", font=self.fuenteDelComponente).grid(
-            row=5, column=0,columnspan=2,pady=10)
+        tk.Label(self.contenedorForm, text="Identificar Evento como", font=self.fuenteDelComponente).grid(row=5, column=0,columnspan=2,pady=10)
         self.identificadoInput=tk.Entry(self.contenedorForm, textvariable=self.identificadorEvento,font=self.fuenteDelComponente, justify="center")
         self.identificadoInput.grid( row=5, column=2, columnspan=2, sticky="we", pady=10)
         tk.Label(self.contenedorForm,text="Descripción",font=self.fuenteDelComponente).grid(row=6,column=0,columnspan=4,pady=5);
-        self.descripcion = tk.Text(
-            self.contenedorForm, font=self.fuenteDelComponente,height=5,width=60);
+        self.descripcion = tk.Text(self.contenedorForm, font=self.fuenteDelComponente,height=5,width=60);
         self.descripcion.grid(row=7, column=0, columnspan=4,padx=5,pady=5);
-        self.botonCrearEvento=tk.Button(self.contenedorForm, text="Agregar Evento", command=self.setEvento,
+        self.botonCrearEvento=tk.Button(self.contenedorForm, text="Agregar Evento", command=self.agregarEvento,
                   padx=5, pady=5,font=self.fuenteDelComponente,fg="white",bg=self.colorBotones);
         self.botonCrearEvento.grid(
             row=8, column=0, columnspan=4, sticky="snew");
@@ -98,57 +96,61 @@ class ComponenteEvento(tk.Frame):
         command=self.modificarEvento);
         self.botonCancelarEdicion = tk.Button(self.contenedorForm, text="Cancelar Edicion",
                                               fg="white",command=self.reestabecerBotonOriginal, font=self.fuenteDelComponente, bg="#CF6562")
-    def setEvento(self):
+    
+    def agregarEvento(self):
         if(not self.comprobarEntrysVacios()):
             if (AdministradorDeFechas.validarHora(self.hora.get(), self.minutos.get()) and AdministradorDeFechas.validarHora(self.horaRecordatorio.get(), self.minutosRecordatorio.get())):
                 self.cargarEvento()
                 self.tablaEventos.agregarEventoATabla(self.evento)
             else:
-                messagebox.showwarning(
-                "Advertencia", "Hora de Evento o Recordatorio ingresada invalida")
+                messagebox.showwarning("Advertencia", "Hora de Evento o Recordatorio ingresada invalida");
 
         else:
             messagebox.showwarning("Advertencia", "Existen entradas sin completar");
 
-    def getEvento(self):
-        return self.evento;
 
     def colocarRegistrosCargadosEnCampos(self,evento):
-        fechaFormateadaADate = AdministradorDeFechas.cadenaDeFechaADate(
-            evento["fecha"])
-        fechaRecordatorioFormateada = AdministradorDeFechas.cadenaDeFechaADate(
-            evento["fechaRecordatorio"])
+        self.limpiarTabla();
+        self.cargarCampos(evento);
+
+    def limpiarTabla(self):
+        fechaActual = datetime.now().date();
+        self.tituloInput.delete(0, tk.END);
+        self.horaInput.delete(0, tk.END);
+        self.fechaInput.set_date(fechaActual)
+        self.minutosInput.delete(0,tk.END);
+        self.duracionInput.delete(0, tk.END);
+        self.checkButtonInput.deselect();
+        self.fechaRecordatorioInput.set_date(fechaActual)
+        self.horaRecordatorioInput.delete(0, tk.END);
+        self.minutosRecordatorioInput.delete(0, tk.END);
+        self.identificadoInput.delete(0, tk.END);
+        self.descripcion.delete("1.0", 'end-1c');
+
+    def cargarCampos(self,evento):
+        fechaFormateadaADate = AdministradorDeFechas.cadenaDeFechaADate(evento["fecha"])
+        fechaRecordatorioFormateada = AdministradorDeFechas.cadenaDeFechaADate(evento["fechaRecordatorio"])
         horaEvento,minutoEvento=AdministradorDeFechas.horaYMinutoSeparados(evento["hora"]);
         horaRecordatorio,minutoRecordatorio=AdministradorDeFechas.horaYMinutoSeparados(evento["horaRecordatorio"]);
 
-        self.tituloInput.delete(0, tk.END)
         self.tituloInput.insert(0, evento["titulo"])
-        #self.fechaInput.delete(0, tk.END)
-        self.fechaInput.set_date(fechaFormateadaADate)
-        self.horaInput.delete(0, tk.END)
-        self.horaInput.insert(0, horaEvento)
-        self.minutosInput.delete(0,tk.END);
-        self.minutosInput.insert(0,minutoEvento);
-        self.duracionInput.delete(0, tk.END)
+        self.fechaInput.set_date(fechaFormateadaADate)        
+        self.horaInput.insert(0, horaEvento)      
+        self.minutosInput.insert(0,minutoEvento);        
         self.duracionInput.insert(0, evento["duracion"])
 
         if (evento["importancia"]):
             self.checkButtonInput.select()
         else:
-            self.checkButtonInput.deselect()
-                    
-        self.fechaRecordatorioInput.set_date(fechaRecordatorioFormateada)
-        self.horaRecordatorioInput.delete(0, tk.END)
-        self.horaRecordatorioInput.insert(0, horaRecordatorio)
-        self.minutosRecordatorioInput.delete(0,tk.END)
-        self.minutosRecordatorioInput.insert(0, minutoRecordatorio)
-        self.identificadoInput.delete(0, tk.END)
-        self.identificadoInput.insert(0, evento["identificadorEvento"])
-        self.descripcion.delete("1.0", 'end-1c')
+            self.checkButtonInput.deselect()                    
+        self.fechaRecordatorioInput.set_date(fechaRecordatorioFormateada)        
+        self.horaRecordatorioInput.insert(0, horaRecordatorio)        
+        self.minutosRecordatorioInput.insert(0, minutoRecordatorio)        
+        self.identificadoInput.insert(0, evento["identificadorEvento"])        
         self.descripcion.insert(tk.INSERT, evento["descripcion"])
 
     def editarRegistro(self,evento,indice,indiceFilaTabla):
-        print(evento);
+        #print(evento);
         #Declaro los botones
         self.contenedorForm.configure(text="Modificar Evento")
         self.botonCrearEvento.grid_forget()
@@ -168,12 +170,10 @@ class ComponenteEvento(tk.Frame):
         self.botonCancelarEdicion.grid(row=8, column=2, columnspan=2,sticky="we",padx=5);
 
     def reestabecerBotonOriginal(self):
-        self.botonEditarEvento.grid_forget()
-        self.botonCancelarEdicion.grid_forget()
-        self.contenedorForm.configure(
-            text="Agregar nuevo Evento")
-        self.botonCrearEvento.grid(
-            row=8, column=0, columnspan=4, sticky="snew")
+        self.botonEditarEvento.grid_forget();
+        self.botonCancelarEdicion.grid_forget();
+        self.contenedorForm.configure(text="Agregar nuevo Evento");
+        self.botonCrearEvento.grid(row=8, column=0, columnspan=4, sticky="snew");
     
     def comprobarEntrysVacios(self):
         lista=[self.tituloInput,self.duracionInput,self.identificadorEvento];
@@ -203,14 +203,16 @@ class ComponenteEvento(tk.Frame):
         if (resBusqueda!=False):
             #obtengo el indice del objeto para comprobar si el que quiero editar
             indice=resBusqueda[0]
-            esElMismoEvento=indice==self.indiceElementoAEditar;
+            esElMismoEvento= indice==self.indiceElementoAEditar;
                 
         if(resBusqueda==False or esElMismoEvento):
             self.manejadorDeLaListaEventos.contenedorObjetos[self.indiceElementoAEditar] = self.evento.getEventoComoDict()
             self.manejadorDeLaListaEventos.escribirEnFichero()
             self.tablaEventos.modificarFila(self.evento, self.indiceFilaTabla)
-        
+            
             
         else:
             messagebox.showerror("Hora ya registrada",
                                  f"El registro del evento {self.evento.fecha} {self.evento.hora} ya se encuentra en uso")
+        self.limpiarTabla();
+        self.reestabecerBotonOriginal()

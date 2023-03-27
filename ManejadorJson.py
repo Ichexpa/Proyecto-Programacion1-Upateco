@@ -24,7 +24,8 @@ class ManejadorJson:
                                                                                              objeto["hora"])
             if (eventoAEncontrar == fechaDelEventoAEncontrar):
                 return indice,objeto;
-        return False #Si no se encuentra el indice
+        #Si no se encuentra el indice
+        return False 
     
     def limpiarCadenas(palabra):
 
@@ -53,10 +54,15 @@ class ManejadorJson:
         try:
             with open(self.ruta, "r", encoding="UTF-8") as archivo:
                 self.contenedorObjetos = json.load(archivo);
+        #Si no se encuentra creado el archivo se crea
         except FileNotFoundError:
             print("No se encontro la ruta especificada, Se procedera a crearla");
             archivo=open(self.ruta,"w");
             archivo.close();
+        #En caso de que el json exista pero no tenga informacion se incializa con una lista vacia
+        except json.JSONDecodeError:
+            self.escribirEnFichero();
+    
     def obtenerPrimerosSieteDias(self,dias=7):
         listaPrimerosDias=[]
         adminFechas = AdministradorDeFechas();
@@ -73,10 +79,3 @@ class ManejadorJson:
             if (AdministradorDeFechas.comprobarSiSeEncuentraEnElMesActual(fechaAComparar,mesInferior,mesSuperior)):
                 listaDeEventosMeses.append(self.contenedorObjetos[indice]);
         return listaDeEventosMeses
-
-        
-
-""" Yeison=ManejadorJson("json.json");
-Yeison.agregarObjetoAFichero({'titulo': 'Pimpeano', 'fecha': '12,32', 'hora': '232', 'duracion': 24, 'descripcion': '',
-                              'importancia': False, 'fechaRecordatorio': 415, 'horaRecordatorio': 223, 'identificadorEvento': 343})
- """

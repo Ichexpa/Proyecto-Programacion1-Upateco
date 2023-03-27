@@ -6,15 +6,12 @@ class AdministradorDeFechas:
     def __init__(self):
         self.actualizarAtributosFecha(7);
 
-
     def cadenaDeFechaADate(fecha):
        return datetime.strptime(fecha,'%d-%m-%Y').date();
 
     def actualizarAtributosFecha(self,dias):
         fechaActual = datetime.now().date();
         self.fechaLimiteSuperior=fechaActual+timedelta(days=dias);
-        #print(self.fechaLimiteInferior);
-        #print(f"La fecha superior es {self.fechaLimiteSuperior}")
         self.fechaLimiteInferior = self.fechaLimiteSuperior-timedelta(days=7)
 
     def seEncuentraEnLaSemana(self,fecha,dias):
@@ -32,6 +29,7 @@ class AdministradorDeFechas:
         fechaYhora=f'{fecha} {hora}';
         fechaYhoraConvertidos=datetime.strptime(fechaYhora,"%d-%m-%Y %H:%M");
         return fechaYhoraConvertidos;
+
     def getMesActual(self,fecha):
 
         ultimoDiaDelMes=monthrange(fecha.year,fecha.month);
@@ -40,6 +38,7 @@ class AdministradorDeFechas:
         
     def aumentarMes(self):
         self.fechaUltimoDia = self.fechaUltimoDia+timedelta(days=1)
+
     def restarMes(self):
         self.fechaPrimerDia=self.fechaPrimerDia-timedelta(days=1);
 
@@ -85,5 +84,3 @@ class AdministradorDeFechas:
         return f'{parteHora}:{parteMinuto}';
     def horaYMinutoSeparados(horaString):
         return horaString[:2], horaString[3:]
-
-print(AdministradorDeFechas.horaYMinutoSeparados("02:20"))
